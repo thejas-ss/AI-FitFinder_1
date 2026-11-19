@@ -1,17 +1,55 @@
 version: 2
+
 updates:
+  # Python (backend)
   - package-ecosystem: pip
     directory: /backend
     schedule: { interval: weekly }
+    open-pull-requests-limit: 2
+    ignore:
+      # passlib 1.7.4 is unmaintained and breaks with bcrypt >= 4.1 (we pin 4.0.1 on purpose).
+      - dependency-name: bcrypt
+      - dependency-name: passlib
+      # Review major upgrades by hand instead of getting a failing PR.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      python-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # npm (frontend)
   - package-ecosystem: npm
     directory: /frontend
     schedule: { interval: weekly }
+    open-pull-requests-limit: 2
+    ignore:
+      # Dependabot's npm updater fails on this package (dependency_file_not_supported).
+      - dependency-name: zod
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      npm-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # GitHub Actions (cd.yml, ci.yml)
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+    open-pull-requests-limit: 2
+
+  # Docker base images
   - package-ecosystem: docker
     directory: /backend
     schedule: { interval: weekly }
+    open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: docker
     directory: /frontend
     schedule: { interval: weekly }
+    open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
